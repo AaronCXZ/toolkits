@@ -21,13 +21,13 @@ type Message struct {
 }
 
 var (
-	Smtp SMTPMessage
+	smtp SMTPMessage
 	conn *gomail.Dialer
 )
 
 func Init(cfg SMTPMessage) {
-	Smtp = cfg
-	conn = gomail.NewDialer(Smtp.Host, Smtp.Port, Smtp.User, Smtp.Password)
+	smtp = cfg
+	conn = gomail.NewDialer(smtp.Host, smtp.Port, smtp.User, smtp.Password)
 }
 
 // 邮件内容校验
@@ -72,7 +72,7 @@ func NewMessage(to, subject, body string) (mail *Message, err error) {
 // 发送邮件
 func Send(msg *Message) (err error) {
 	m := gomail.NewMessage()
-	m.SetHeader("From", Smtp.User)      // 发件人
+	m.SetHeader("From", smtp.User)      // 发件人
 	m.SetHeader("To", msg.Tos...)       // 收件人
 	m.SetHeader("Subject", msg.Subject) // 主题
 	m.SetBody("text/html", msg.Content) // 正文
