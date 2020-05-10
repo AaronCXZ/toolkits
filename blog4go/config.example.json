@@ -1,0 +1,32 @@
+{
+    "minlevel": "debug",
+    "filter": [
+      {
+        "levels": "trace",
+        "rotatefile": {
+          "path": "E:\\\\gopath\\\\src\\\\github.com\\\\Muskchen\\\\toolkits\\\\logger\\\\log\\\\trace.log",
+          "type": "time",
+          "retentions": "5"
+        }
+      },
+      {
+        "levels": "debug",
+        "colored": "true",
+        "file": { "path": "E:\\\\gopath\\\\src\\\\github.com\\\\Muskchen\\\\toolkits\\\\logger\\\\log\\\\debug.log" }
+      },
+      {
+        "levels": "info",
+        "colored": "true",
+        "file": { "path": "E:\\\\gopath\\\\src\\\\github.com\\\\Muskchen\\\\toolkits\\\\logger\\\\log\\\\info.log" }
+      },
+      {
+        "levels": "warn,error",
+        "rotatefile": {
+          "path": "E:\\\\gopath\\\\src\\\\github.com\\\\Muskchen\\\\toolkits\\\\logger\\\\log\\\\error.log",
+          "type": "size",
+          "rotateSize": "50000000",
+          "retentions": "10"
+        }
+      }
+    ]
+  }
