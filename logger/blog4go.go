@@ -1,9 +1,7 @@
-// Copyright (c) 2015, huangjunwei <huangjunwei@youmi.net>. All rights reserved.
-
 // Package blog4go provide an efficient and easy-to-use writers library for
 // logging into files, console or sockets. Writers suports formatting
 // string filtering and calling user defined hook in asynchronous mode.
-package blog4go
+package logger
 
 import (
 	"bufio"

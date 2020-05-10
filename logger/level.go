@@ -1,6 +1,4 @@
-// Copyright (c) 2015, huangjunwei <huangjunwei@youmi.net>. All rights reserved.
-
-package blog4go
+package logger
 
 import (
 	"fmt"
