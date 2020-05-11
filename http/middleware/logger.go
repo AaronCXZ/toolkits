@@ -26,7 +26,7 @@ func LoggerMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 		c.Next()
-		latencyTime := time.Now().Sub(start).Seconds()
+		latencyTime := time.Since(start)
 		method := c.Request.Method
 		path := c.Request.RequestURI
 		code := c.Writer.Status()
