@@ -1,0 +1,43 @@
+package http
+
+import (
+	"context"
+	"net/http"
+	"time"
+
+	"github.com/Muskchen/toolkits/http/middleware"
+	"github.com/Muskchen/toolkits/logger"
+	"github.com/gin-gonic/gin"
+)
+
+var srv = &http.Server{
+	ReadTimeout:    time.Duration(10) * time.Second,
+	WriteTimeout:   time.Duration(10) * time.Second,
+	MaxHeaderBytes: 1 << 20,
+}
+
+func Start(r *gin.Engine, addr string, level string) {
+	r.Use(middleware.ErrorLogger(), middleware.LoggerMiddleware())
+	srv.Addr = addr
+	srv.Handler = r
+	go func() {
+		logger.Infof("starting http server, listening on: ", srv.Addr)
+		if err := srv.ListenAndServe(); err != nil {
+			logger.Errorf("listening %s occur error: %s\n", srv.Addr, err)
+		}
+	}()
+}
+
+func Shutdown() {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(ctx); err != nil {
+		logger.Errorf("cannot shutdown http server:", err)
+	}
+	select {
+	case <-ctx.Done():
+		logger.Info("shutdown http server timeout of 5 seconds.")
+	default:
+		logger.Info("http server stopped")
+	}
+}
