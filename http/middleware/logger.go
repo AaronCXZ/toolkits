@@ -14,7 +14,7 @@ func ErrorLogger() gin.HandlerFunc {
 func ErrorLoggerT(typ gin.ErrorType) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Next()
-		logger.Errorf("%s\n", c.Errors.String())
+		logger.Errorf("%s", c.Errors.String())
 		errors := c.Errors.ByType(typ)
 		if len(errors) > 0 {
 			c.JSON(-1, errors)
@@ -26,12 +26,12 @@ func LoggerMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 		c.Next()
-		latencyTime := time.Now().Sub(start)
+		latencyTime := time.Now().Sub(start).Seconds()
 		method := c.Request.Method
 		path := c.Request.RequestURI
 		code := c.Writer.Status()
 		clientIP := c.ClientIP()
-		logger.Infof("code: %3d latencyTime: %d clientIP: %s method: %s requestUrl: %s\n",
+		logger.Infof("code: %3d latencyTime: %d clientIP: %s method: %s requestUrl: %s",
 			code, latencyTime, clientIP, method, path,
 		)
 	}
