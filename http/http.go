@@ -21,9 +21,9 @@ func Start(r *gin.Engine, addr string, level string) {
 	srv.Addr = addr
 	srv.Handler = r
 	go func() {
-		logger.Infof("starting http server, listening on: ", srv.Addr)
+		logger.Infof("starting http server, listening on: %s", srv.Addr)
 		if err := srv.ListenAndServe(); err != nil {
-			logger.Errorf("listening %s occur error: %s\n", srv.Addr, err)
+			logger.Errorf("listening %s occur error: %s", srv.Addr, err)
 		}
 	}()
 }
@@ -32,7 +32,7 @@ func Shutdown() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
-		logger.Errorf("cannot shutdown http server:", err)
+		logger.Errorf("cannot shutdown http server: %s", err)
 	}
 	select {
 	case <-ctx.Done():
