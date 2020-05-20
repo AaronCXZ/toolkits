@@ -229,6 +229,11 @@ func (w *Writer) CompressFile(oldfile *os.File, cmpname string) error {
 	gw := gzip.NewWriter(cmpfile)
 	defer gw.Close()
 
+	// 设置下次读取oldfile文件时的偏移量，及从头开始读取oldfile到压缩文件
+	if _, err := oldfile.Seek(0, 0); err != nil {
+		return err
+	}
+
 	if _, err := io.Copy(gw, oldfile); err != nil {
 		// 当压缩失败时删除压缩文件
 		if errR := os.Remove(cmpname); errR != nil {
