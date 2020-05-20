@@ -92,9 +92,9 @@ func (m *manager) GenLogFileName(c *Config) (filename string) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
 	if c.Compress {
-		filename = path.Join(c.LogPath, c.FileName+".log.gz"+m.startAt.Format(c.TimeTagFormat))
+		filename = path.Join(c.LogPath, c.FileName+".log.gz."+m.startAt.Format(c.TimeTagFormat))
 	} else {
-		filename = path.Join(c.LogPath, c.FileName+".log"+m.startAt.Format(c.TimeTagFormat))
+		filename = path.Join(c.LogPath, c.FileName+".log."+m.startAt.Format(c.TimeTagFormat))
 	}
 	m.startAt = time.Now()
 	return filename
