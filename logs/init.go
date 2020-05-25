@@ -60,6 +60,14 @@ func Init(cfg *Config) {
 	}
 }
 
+func GetLogger() *zap.Logger {
+	return logger
+}
+
+func getSLogger() *zap.SugaredLogger {
+	return logger.Sugar()
+}
+
 // 初始化配置
 func newEncoderConfig(format string) zapcore.EncoderConfig {
 	return zapcore.EncoderConfig{

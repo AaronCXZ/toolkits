@@ -18,7 +18,7 @@ func TestInit(t *testing.T) {
 				LogPath:            "./",
 				FileName:           "info",
 				MaxRemain:          3,
-				RollingPolicy:      rollingwriter.WithoutRolling,
+				RollingPolicy:      rollingwriter.TimeRolling,
 				RollingTimePattern: "* * * * *",
 				WriterMode:         "lock",
 				Compress:           true,
