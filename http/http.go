@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Muskchen/toolkits/http/middleware"
 	"github.com/Muskchen/toolkits/logger"
 	"github.com/gin-gonic/gin"
 )
@@ -16,8 +15,7 @@ var srv = &http.Server{
 	MaxHeaderBytes: 1 << 20,
 }
 
-func Start(r *gin.Engine, addr string, level string) {
-	r.Use(middleware.ErrorLogger(), middleware.LoggerMiddleware())
+func Start(r *gin.Engine, addr string) {
 	srv.Addr = addr
 	srv.Handler = r
 	go func() {
