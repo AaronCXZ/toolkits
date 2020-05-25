@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/Muskchen/toolkits/http/render"
-
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )

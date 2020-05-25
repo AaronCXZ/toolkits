@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -55,7 +54,7 @@ var jt *JWT = &JWT{SingingKey: []byte("test")}
 
 var foreverClaims CustomClaims = CustomClaims{
 	1000,
-	"defaul",
+	"default",
 	"default@qq.com",
 	jwt.StandardClaims{
 		ExpiresAt: 0,
