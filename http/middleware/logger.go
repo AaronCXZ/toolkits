@@ -9,44 +9,15 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Muskchen/toolkits/logger"
+	"github.com/Muskchen/toolkits/logs"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
 const TimeFormat = "2006-01-02 15:04:05"
 
-func ErrorLogger() gin.HandlerFunc {
-	return ErrorLoggerT(gin.ErrorTypeAny)
-}
-
-func ErrorLoggerT(typ gin.ErrorType) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.Next()
-		logger.Errorf("%s", c.Errors.String())
-		errors := c.Errors.ByType(typ)
-		if len(errors) > 0 {
-			c.JSON(-1, errors)
-		}
-	}
-}
-
-func LoggerMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		start := time.Now()
-		c.Next()
-		latencyTime := time.Since(start)
-		method := c.Request.Method
-		path := c.Request.RequestURI
-		code := c.Writer.Status()
-		clientIP := c.ClientIP()
-		logger.Infof("code: %3d latencyTime: %d clientIP: %s method: %s requestUrl: %s",
-			code, latencyTime, clientIP, method, path,
-		)
-	}
-}
-
-func GinZapLogger(log *zap.Logger) gin.HandlerFunc {
+// 使用zao.logger的中间件
+func GinZapLogger() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 		path := c.Request.URL.Path
@@ -57,10 +28,10 @@ func GinZapLogger(log *zap.Logger) gin.HandlerFunc {
 
 		if len(c.Errors) > 0 {
 			for _, e := range c.Errors.Errors() {
-				log.Error(e)
+				logs.Error(e)
 			}
 		} else {
-			log.Info(path,
+			logs.Info(path,
 				zap.Int("status", c.Writer.Status()),
 				zap.String("method", c.Request.Method),
 				zap.String("path", path),
@@ -74,7 +45,8 @@ func GinZapLogger(log *zap.Logger) gin.HandlerFunc {
 	}
 }
 
-func GinZapSugaredLogger(log *zap.SugaredLogger) gin.HandlerFunc {
+// 使用zap.SugaredLogger的中间件
+func GinZapSugaredLogger() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 		path := c.Request.URL.Path
@@ -85,10 +57,10 @@ func GinZapSugaredLogger(log *zap.SugaredLogger) gin.HandlerFunc {
 
 		if len(c.Errors) > 0 {
 			for _, e := range c.Errors.Errors() {
-				log.Error(e)
+				logs.SError(e)
 			}
 		} else {
-			log.Info(path,
+			logs.SInfo(path,
 				zap.Int("status", c.Writer.Status()),
 				zap.String("method", c.Request.Method),
 				zap.String("path", path),
@@ -102,7 +74,8 @@ func GinZapSugaredLogger(log *zap.SugaredLogger) gin.HandlerFunc {
 	}
 }
 
-func RecoverWithZapLogger(log *zap.Logger, stack bool) gin.HandlerFunc {
+// Panic恢复的中间件
+func RecoverWithZapLogger(stack bool) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		defer func() {
 			if err := recover(); err != nil {
@@ -118,7 +91,7 @@ func RecoverWithZapLogger(log *zap.Logger, stack bool) gin.HandlerFunc {
 
 				httpRequest, _ := httputil.DumpRequest(c.Request, false)
 				if brokenPipe {
-					log.Error(c.Request.URL.Path,
+					logs.Error(c.Request.URL.Path,
 						zap.Any("error", err),
 						zap.String("request", string(httpRequest)),
 					)
@@ -128,14 +101,14 @@ func RecoverWithZapLogger(log *zap.Logger, stack bool) gin.HandlerFunc {
 				}
 
 				if stack {
-					log.Error("[Recovery from panic]",
+					logs.Error("[Recovery from panic]",
 						zap.Time("time", time.Now()),
 						zap.Any("error", err),
 						zap.String("request", string(httpRequest)),
 						zap.String("stack", string(debug.Stack())),
 					)
 				} else {
-					log.Error("[Recovery from panic]",
+					logs.Error("[Recovery from panic]",
 						zap.Time("time", time.Now()),
 						zap.Any("error", err),
 						zap.String("request", string(httpRequest)),
