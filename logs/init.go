@@ -69,13 +69,12 @@ func newEncoderConfig(format string) zapcore.EncoderConfig {
 		CallerKey:     "file",                           // 调用信息对应的key
 		StacktraceKey: "stacktrace",                     // 栈追踪对应的key
 		EncodeLevel:   zapcore.CapitalColorLevelEncoder, // 带颜色的大写的日志级别显示
+		LineEnding:    zapcore.DefaultLineEnding,        // 日志的换行符，默认为"\n"
 		EncodeTime: func(t time.Time, en zapcore.PrimitiveArrayEncoder) {
 			en.AppendString(t.Format(format))
 		}, // 时间格式化
-		EncodeDuration: func(d time.Duration, enc zapcore.PrimitiveArrayEncoder) {
-			enc.AppendInt64(int64(d) / 1000000)
-		}, // 序列化时间的类型
-		EncodeCaller: zapcore.ShortCallerEncoder, // 采用短格式输出字段
+		EncodeDuration: zapcore.SecondsDurationEncoder, // 序列化时间的类型
+		EncodeCaller:   zapcore.ShortCallerEncoder,     // 采用短格式输出字段
 	}
 }
 
