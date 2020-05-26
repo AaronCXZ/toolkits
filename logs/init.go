@@ -77,13 +77,13 @@ func getSLogger() *zap.SugaredLogger {
 // 初始化配置
 func newEncoderConfig(format string) zapcore.EncoderConfig {
 	return zapcore.EncoderConfig{
-		MessageKey:    "msg",                            // 日志消息对应的key
-		LevelKey:      "level",                          // 日志级别对应的key
-		TimeKey:       "ts",                             // 时间对应的key
-		CallerKey:     "file",                           // 调用信息对应的key
-		StacktraceKey: "stacktrace",                     // 栈追踪对应的key
-		EncodeLevel:   zapcore.CapitalColorLevelEncoder, // 带颜色的大写的日志级别显示
-		LineEnding:    zapcore.DefaultLineEnding,        // 日志的换行符，默认为"\n"
+		MessageKey:    "msg",                       // 日志消息对应的key
+		LevelKey:      "level",                     // 日志级别对应的key
+		TimeKey:       "ts",                        // 时间对应的key
+		CallerKey:     "file",                      // 调用信息对应的key
+		StacktraceKey: "stacktrace",                // 栈追踪对应的key
+		EncodeLevel:   zapcore.CapitalLevelEncoder, // 大写的日志级别显示
+		LineEnding:    zapcore.DefaultLineEnding,   // 日志的换行符，默认为"\n"
 		EncodeTime: func(t time.Time, en zapcore.PrimitiveArrayEncoder) {
 			en.AppendString(t.Format(format))
 		}, // 时间格式化
