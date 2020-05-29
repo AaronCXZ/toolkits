@@ -70,7 +70,7 @@ func GetLogger() *zap.Logger {
 	return logger
 }
 
-func getSLogger() *zap.SugaredLogger {
+func GetSLogger() *zap.SugaredLogger {
 	return logger.Sugar()
 }
 
