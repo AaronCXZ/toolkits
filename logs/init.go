@@ -62,7 +62,7 @@ func Init(cfg *Config) {
 
 func Close() {
 	if err := logger.Sync(); err != nil {
-		Error("closed err", zap.Error(err))
+		logger.Error("closed err", zap.Error(err))
 	}
 }
 
@@ -124,77 +124,4 @@ func logLevel(level string) zapcore.Level {
 	default:
 		return zap.InfoLevel
 	}
-}
-
-// 各级别日志输出函数
-func Debug(msg string, fields ...zap.Field) {
-	logger.Debug(msg, fields...)
-}
-
-func SDebug(v ...interface{}) {
-	logger.Sugar().Debug(v...)
-}
-
-func SDebugf(format string, v ...interface{}) {
-	logger.Sugar().Debugf(format, v...)
-}
-
-func Info(msg string, fields ...zap.Field) {
-	logger.Info(msg, fields...)
-}
-
-func SInfo(v ...interface{}) {
-	logger.Sugar().Info(v...)
-}
-
-func SInfof(format string, v ...interface{}) {
-	logger.Sugar().Infof(format, v...)
-}
-
-func Warn(msg string, fields ...zap.Field) {
-	logger.Warn(msg, fields...)
-}
-
-func SWarn(v ...interface{}) {
-	logger.Sugar().Warn(v...)
-}
-
-func SWarnf(format string, v ...interface{}) {
-	logger.Sugar().Warnf(format, v...)
-}
-
-func Error(msg string, fields ...zap.Field) {
-	logger.Error(msg, fields...)
-}
-
-func SError(v ...interface{}) {
-	logger.Sugar().Error(v...)
-}
-
-func SErrorf(format string, v ...interface{}) {
-	logger.Sugar().Errorf(format, v...)
-}
-
-func Panic(msg string, fields ...zap.Field) {
-	logger.Panic(msg, fields...)
-}
-
-func SPanic(v ...interface{}) {
-	logger.Sugar().Panic(v...)
-}
-
-func SPanicf(format string, v ...interface{}) {
-	logger.Sugar().Panicf(format, v...)
-}
-
-func Fatal(msg string, fields ...zap.Field) {
-	logger.Fatal(msg, fields...)
-}
-
-func SFatal(v ...interface{}) {
-	logger.Sugar().Fatal(v...)
-}
-
-func SFatalf(format string, v ...interface{}) {
-	logger.Sugar().Fatalf(format, v...)
 }
