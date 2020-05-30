@@ -18,6 +18,7 @@ const TimeFormat = "2006-01-02 15:04:05"
 
 // 使用zao.logger的中间件
 func GinZapLogger() gin.HandlerFunc {
+	logger := logs.GetLogger()
 	return func(c *gin.Context) {
 		start := time.Now()
 		path := c.Request.URL.Path
@@ -28,10 +29,10 @@ func GinZapLogger() gin.HandlerFunc {
 
 		if len(c.Errors) > 0 {
 			for _, e := range c.Errors.Errors() {
-				logs.Error(e)
+				logger.Error(e)
 			}
 		} else {
-			logs.Info(path,
+			logger.Info(path,
 				zap.Int("status", c.Writer.Status()),
 				zap.String("method", c.Request.Method),
 				zap.String("path", path),
@@ -47,6 +48,7 @@ func GinZapLogger() gin.HandlerFunc {
 
 // 使用zap.SugaredLogger的中间件
 func GinZapSugaredLogger() gin.HandlerFunc {
+	logger := logs.GetSLogger()
 	return func(c *gin.Context) {
 		start := time.Now()
 		path := c.Request.URL.Path
@@ -57,10 +59,10 @@ func GinZapSugaredLogger() gin.HandlerFunc {
 
 		if len(c.Errors) > 0 {
 			for _, e := range c.Errors.Errors() {
-				logs.SError(e)
+				logger.Error(e)
 			}
 		} else {
-			logs.SInfo(path,
+			logger.Info(path,
 				zap.Int("status", c.Writer.Status()),
 				zap.String("method", c.Request.Method),
 				zap.String("path", path),
@@ -76,6 +78,7 @@ func GinZapSugaredLogger() gin.HandlerFunc {
 
 // Panic恢复的中间件
 func RecoverWithZapLogger(stack bool) gin.HandlerFunc {
+	logger := logs.GetSLogger()
 	return func(c *gin.Context) {
 		defer func() {
 			if err := recover(); err != nil {
@@ -91,7 +94,7 @@ func RecoverWithZapLogger(stack bool) gin.HandlerFunc {
 
 				httpRequest, _ := httputil.DumpRequest(c.Request, false)
 				if brokenPipe {
-					logs.Error(c.Request.URL.Path,
+					logger.Error(c.Request.URL.Path,
 						zap.Any("error", err),
 						zap.String("request", string(httpRequest)),
 					)
@@ -101,14 +104,14 @@ func RecoverWithZapLogger(stack bool) gin.HandlerFunc {
 				}
 
 				if stack {
-					logs.Error("[Recovery from panic]",
+					logger.Error("[Recovery from panic]",
 						zap.Time("time", time.Now()),
 						zap.Any("error", err),
 						zap.String("request", string(httpRequest)),
 						zap.String("stack", string(debug.Stack())),
 					)
 				} else {
-					logs.Error("[Recovery from panic]",
+					logger.Error("[Recovery from panic]",
 						zap.Time("time", time.Now()),
 						zap.Any("error", err),
 						zap.String("request", string(httpRequest)),
