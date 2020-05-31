@@ -3,12 +3,13 @@ package set
 import (
 	"bytes"
 	"fmt"
-	"sync"
 )
 
 type Set interface {
 	Add(e interface{}) bool
+	Adds(items ...interface{})
 	Remove(e interface{})
+	Removes(items ...interface{})
 	Clear()
 	Contains(e interface{}) bool
 	Len() int
@@ -18,14 +19,20 @@ type Set interface {
 }
 
 type HashSet struct {
-	m  map[interface{}]bool
-	mx sync.RWMutex
+	m map[interface{}]bool
+}
+
+func NewSet(items ...interface{}) Set {
+	s := &HashSet{}
+	s.m = make(map[interface{}]bool)
+	for _, item := range items {
+		s.Add(item)
+	}
+	return s
 }
 
 // 添加
 func (set *HashSet) Add(e interface{}) bool {
-	set.mx.Lock()
-	defer set.mx.Unlock()
 	if !set.m[e] {
 		set.m[e] = true
 		return true
@@ -33,12 +40,22 @@ func (set *HashSet) Add(e interface{}) bool {
 	return false
 }
 
+func (set *HashSet) Adds(items ...interface{}) {
+	for _, item := range items {
+		set.Add(item)
+	}
+}
+
 // 删除
 func (set *HashSet) Remove(e interface{}) {
-	set.mx.Lock()
-	defer set.mx.Unlock()
 	if set.Contains(e) {
 		delete(set.m, e)
+	}
+}
+
+func (set *HashSet) Removes(items ...interface{}) {
+	for _, item := range items {
+		set.Remove(item)
 	}
 }
 
@@ -49,22 +66,16 @@ func (set *HashSet) Clear() {
 
 // 元素是否存在
 func (set *HashSet) Contains(e interface{}) bool {
-	set.mx.RLock()
-	defer set.mx.RUnlock()
 	return set.m[e]
 }
 
 // 长度
 func (set *HashSet) Len() int {
-	set.mx.RLock()
-	defer set.mx.RUnlock()
 	return len(set.m)
 }
 
 // 判断是否相同
 func (set *HashSet) Same(other Set) bool {
-	set.mx.Lock()
-	defer set.mx.Unlock()
 	if other == nil {
 		return false
 	}
@@ -81,8 +92,6 @@ func (set *HashSet) Same(other Set) bool {
 
 // 获取所有元素
 func (set *HashSet) Elements() []interface{} {
-	set.mx.Lock()
-	defer set.mx.Unlock()
 	initialLen := len(set.m)
 	snapshot := make([]interface{}, initialLen)
 	actualLen := 0
@@ -101,8 +110,6 @@ func (set *HashSet) Elements() []interface{} {
 }
 
 func (set *HashSet) String() string {
-	set.mx.RLock()
-	defer set.mx.RUnlock()
 	var buf bytes.Buffer
 	buf.WriteString("Set{")
 	first := true
@@ -137,11 +144,4 @@ func IsSuperset(set, other Set) bool {
 		}
 	}
 	return true
-}
-
-func Union(set, other Set) Set {
-	for key := range other.Elements() {
-		set.Add(key)
-	}
-	return set
 }
