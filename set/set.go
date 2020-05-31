@@ -6,101 +6,72 @@ import (
 	"sync"
 )
 
-type Set struct {
-	m map[interface{}]struct{}
-	sync.RWMutex
+type Set interface {
+	Add(e interface{}) bool
+	Remove(e interface{})
+	Clear()
+	Contains(e interface{}) bool
+	Len() int
+	Same(other Set) bool
+	Elements() []interface{}
+	String() string
 }
 
-// 新建
-func NewSet(items ...interface{}) *Set {
-	s := &Set{}
-	s.m = make(map[interface{}]struct{})
-	s.Add(items...)
-	return s
-}
-
-// 输出
-func (s *Set) String() string {
-	s.RLock()
-	defer s.RUnlock()
-	var buf bytes.Buffer
-
-	buf.WriteString("set(")
-
-	for key := range s.m {
-		buf.WriteString(fmt.Sprintf("%v,", key))
-	}
-	buf.WriteString(")")
-	return buf.String()
+type HashSet struct {
+	m  map[interface{}]bool
+	mx sync.RWMutex
 }
 
 // 添加
-func (s *Set) Add(items ...interface{}) {
-	s.Lock()
-	defer s.Unlock()
-	for _, item := range items {
-		s.m[item] = struct{}{}
-	}
-}
-
-// 删除
-func (s *Set) Del(items ...interface{}) {
-	s.Lock()
-	defer s.Unlock()
-	for _, item := range items {
-		delete(s.m, item)
-	}
-}
-
-// 包含
-func (s *Set) Contains(item interface{}) bool {
-	s.RLock()
-	defer s.RUnlock()
-	_, ok := s.m[item]
-	return ok
-}
-
-// 长度
-func (s *Set) Len() int {
-	s.RLock()
-	defer s.RUnlock()
-	return len(s.m)
-}
-
-// 清空
-func (s *Set) Clear() {
-	s.Lock()
-	defer s.Unlock()
-	s.m = make(map[interface{}]struct{})
-}
-
-// 是否为空
-func (s *Set) IsEmpty() bool {
-	if s.Len() == 0 {
+func (set *HashSet) Add(e interface{}) bool {
+	set.mx.Lock()
+	defer set.mx.Unlock()
+	if !set.m[e] {
+		set.m[e] = true
 		return true
 	}
 	return false
 }
 
-// 转换为list
-func (s *Set) List() []interface{} {
-	s.RLock()
-	defer s.RUnlock()
-	var list []interface{}
-	for item := range s.m {
-		list = append(list, item)
+// 删除
+func (set *HashSet) Remove(e interface{}) {
+	set.mx.Lock()
+	defer set.mx.Unlock()
+	if set.Contains(e) {
+		delete(set.m, e)
 	}
-	return list
 }
 
-// 相等
-func (s *Set) Equal(other *Set) bool {
-	s.RLock()
-	defer s.RUnlock()
-	if s.Len() != other.Len() {
+// 清空
+func (set *HashSet) Clear() {
+	set.m = make(map[interface{}]bool)
+}
+
+// 元素是否存在
+func (set *HashSet) Contains(e interface{}) bool {
+	set.mx.RLock()
+	defer set.mx.RUnlock()
+	return set.m[e]
+}
+
+// 长度
+func (set *HashSet) Len() int {
+	set.mx.RLock()
+	defer set.mx.RUnlock()
+	return len(set.m)
+}
+
+// 判断是否相同
+func (set *HashSet) Same(other Set) bool {
+	set.mx.Lock()
+	defer set.mx.Unlock()
+	if other == nil {
 		return false
 	}
-	for key := range s.m {
+	if set.Len() != other.Len() {
+		return false
+	}
+	for key := range set.m {
 		if !other.Contains(key) {
 			return false
 		}
@@ -108,17 +79,69 @@ func (s *Set) Equal(other *Set) bool {
 	return true
 }
 
-// 子集
-func (s *Set) IsSubset(other *Set) bool {
-	s.RLock()
-	defer s.RUnlock()
-	if s.Len() > other.Len() {
+// 获取所有元素
+func (set *HashSet) Elements() []interface{} {
+	set.mx.Lock()
+	defer set.mx.Unlock()
+	initialLen := len(set.m)
+	snapshot := make([]interface{}, initialLen)
+	actualLen := 0
+	for key := range set.m {
+		if actualLen < initialLen {
+			snapshot[actualLen] = key
+		} else {
+			snapshot = append(snapshot, key)
+		}
+		actualLen++
+	}
+	if actualLen < initialLen {
+		snapshot = snapshot[:actualLen]
+	}
+	return snapshot
+}
+
+func (set *HashSet) String() string {
+	set.mx.RLock()
+	defer set.mx.RUnlock()
+	var buf bytes.Buffer
+	buf.WriteString("Set{")
+	first := true
+	for key := range set.m {
+		if first {
+			first = false
+		} else {
+			buf.WriteString(" ")
+		}
+		buf.WriteString(fmt.Sprintf("%v", key))
+	}
+	buf.WriteString("}")
+	return buf.String()
+}
+
+// 超集
+func IsSuperset(set, other Set) bool {
+	if other == nil {
 		return false
 	}
-	for key := range s.m {
-		if !other.Contains(key) {
+	oneLen := set.Len()
+	otherLen := other.Len()
+	if oneLen == 0 || otherLen == 0 {
+		return false
+	}
+	if oneLen > 0 && otherLen == 0 {
+		return true
+	}
+	for _, v := range other.Elements() {
+		if !set.Contains(v) {
 			return false
 		}
 	}
 	return true
+}
+
+func Union(set, other Set) Set {
+	for key := range other.Elements() {
+		set.Add(key)
+	}
+	return set
 }
