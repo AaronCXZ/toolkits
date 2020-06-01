@@ -24,6 +24,10 @@ func NewSSH(user, password, host string, port int) *SSHMessage {
 	}
 }
 
+func (s *SSHMessage) Start() error {
+	return s.start()
+}
+
 // 登录服务器
 func (s *SSHMessage) start() error {
 	var (
@@ -72,10 +76,6 @@ func (s *SSHMessage) Run(cmd string) (out string, err error) {
 	}
 	out = stdOut.String()
 	return out, nil
-}
-
-func (s *SSHMessage) Start() error {
-	return s.start()
 }
 
 // 退出登录

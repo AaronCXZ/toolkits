@@ -16,9 +16,10 @@ import (
 
 const TimeFormat = "2006-01-02 15:04:05"
 
+var logger = logs.GetLogger()
+
 // 使用zao.logger的中间件
 func GinZapLogger() gin.HandlerFunc {
-	logger := logs.GetLogger()
 	return func(c *gin.Context) {
 		start := time.Now()
 		path := c.Request.URL.Path
@@ -48,7 +49,6 @@ func GinZapLogger() gin.HandlerFunc {
 
 // 使用zap.SugaredLogger的中间件
 func GinZapSugaredLogger() gin.HandlerFunc {
-	logger := logs.GetSLogger()
 	return func(c *gin.Context) {
 		start := time.Now()
 		path := c.Request.URL.Path
@@ -59,10 +59,10 @@ func GinZapSugaredLogger() gin.HandlerFunc {
 
 		if len(c.Errors) > 0 {
 			for _, e := range c.Errors.Errors() {
-				logger.Error(e)
+				logger.Sugar().Error(e)
 			}
 		} else {
-			logger.Info(path,
+			logger.Sugar().Info(path,
 				zap.Int("status", c.Writer.Status()),
 				zap.String("method", c.Request.Method),
 				zap.String("path", path),
@@ -78,7 +78,6 @@ func GinZapSugaredLogger() gin.HandlerFunc {
 
 // Panic恢复的中间件
 func RecoverWithZapLogger(stack bool) gin.HandlerFunc {
-	logger := logs.GetSLogger()
 	return func(c *gin.Context) {
 		defer func() {
 			if err := recover(); err != nil {

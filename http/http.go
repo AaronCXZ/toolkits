@@ -9,6 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var logger = logs.GetSLogger()
+
 var srv = &http.Server{
 	ReadTimeout:    time.Duration(10) * time.Second,
 	WriteTimeout:   time.Duration(10) * time.Second,
