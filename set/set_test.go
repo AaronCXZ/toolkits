@@ -8,20 +8,15 @@ import (
 func TestSet(t *testing.T) {
 	s := NewSet(1, 2, 3, 4, 5)
 	fmt.Println(s)
-	t.Run("adds", func(t *testing.T) {
-		s.Adds(6, 7, 8)
-		fmt.Println(s)
-	})
 	t.Run("add", func(t *testing.T) {
-		s.Add(9)
-		fmt.Println(s)
-	})
-	t.Run("removes", func(t *testing.T) {
-		s.Removes(1, 2)
+		s.Add(6)
+		s.Add(7)
+		s.Add(8)
 		fmt.Println(s)
 	})
 	t.Run("remove", func(t *testing.T) {
-		s.Remove(3)
+		s.Remove(1)
+		s.Remove(2)
 		fmt.Println(s)
 	})
 
@@ -44,7 +39,7 @@ func TestSet(t *testing.T) {
 		s1 := NewSet(1, 2, 3)
 		s2 := NewSet(2, 3, 1)
 		s3 := NewSet(1, 2, 3, 4)
-		s4 := NewSet(1, 2, 3)
+		s4 := NewSet(1, 2)
 		fmt.Println(s1.Same(s2))
 		fmt.Println(s1.Same(s3))
 		fmt.Println(s1.Same(s4))

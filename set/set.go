@@ -3,13 +3,12 @@ package set
 import (
 	"bytes"
 	"fmt"
+	"sync"
 )
 
 type Set interface {
 	Add(e interface{}) bool
-	Adds(items ...interface{})
 	Remove(e interface{})
-	Removes(items ...interface{})
 	Clear()
 	Contains(e interface{}) bool
 	Len() int
@@ -19,7 +18,8 @@ type Set interface {
 }
 
 type HashSet struct {
-	m map[interface{}]bool
+	m  map[interface{}]bool
+	mx sync.RWMutex
 }
 
 func NewSet(items ...interface{}) Set {
@@ -33,6 +33,8 @@ func NewSet(items ...interface{}) Set {
 
 // 添加
 func (set *HashSet) Add(e interface{}) bool {
+	set.mx.Lock()
+	defer set.mx.Unlock()
 	if !set.m[e] {
 		set.m[e] = true
 		return true
@@ -40,22 +42,12 @@ func (set *HashSet) Add(e interface{}) bool {
 	return false
 }
 
-func (set *HashSet) Adds(items ...interface{}) {
-	for _, item := range items {
-		set.Add(item)
-	}
-}
-
 // 删除
 func (set *HashSet) Remove(e interface{}) {
+	set.mx.Lock()
+	defer set.mx.Unlock()
 	if set.Contains(e) {
 		delete(set.m, e)
-	}
-}
-
-func (set *HashSet) Removes(items ...interface{}) {
-	for _, item := range items {
-		set.Remove(item)
 	}
 }
 
@@ -76,6 +68,8 @@ func (set *HashSet) Len() int {
 
 // 判断是否相同
 func (set *HashSet) Same(other Set) bool {
+	set.mx.RLock()
+	defer set.mx.RUnlock()
 	if other == nil {
 		return false
 	}
@@ -92,6 +86,8 @@ func (set *HashSet) Same(other Set) bool {
 
 // 获取所有元素
 func (set *HashSet) Elements() []interface{} {
+	set.mx.RLock()
+	defer set.mx.RUnlock()
 	initialLen := len(set.m)
 	snapshot := make([]interface{}, initialLen)
 	actualLen := 0
