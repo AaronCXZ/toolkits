@@ -10,13 +10,11 @@ import (
 )
 
 var logger = logs.GetSLogger()
-
 var srv = &http.Server{
 	ReadTimeout:    time.Duration(10) * time.Second,
 	WriteTimeout:   time.Duration(10) * time.Second,
 	MaxHeaderBytes: 1 << 20,
 }
-var logger = logs.GetSLogger()
 
 func Start(r *gin.Engine, addr string) {
 	srv.Addr = addr
