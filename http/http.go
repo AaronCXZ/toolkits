@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Muskchen/toolkits/logs"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
@@ -12,7 +13,7 @@ import (
 var logger *zap.SugaredLogger
 
 func init() {
-	logger = zap.S()
+	logger = logs.GetSLogger()
 }
 
 var srv = &http.Server{

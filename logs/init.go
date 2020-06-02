@@ -60,6 +60,14 @@ func Init(cfg *Config) {
 	}
 }
 
+func GetLogger() *zap.Logger {
+	return logger
+}
+
+func GetSLogger() *zap.SugaredLogger {
+	return logger.Sugar()
+}
+
 func Close() {
 	if err := logger.Sync(); err != nil {
 		logger.Error("closed err", zap.Error(err))
