@@ -5,11 +5,16 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Muskchen/toolkits/logs"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
-var logger = logs.GetSLogger()
+var logger *zap.SugaredLogger
+
+func init() {
+	logger = zap.S()
+}
+
 var srv = &http.Server{
 	ReadTimeout:    time.Duration(10) * time.Second,
 	WriteTimeout:   time.Duration(10) * time.Second,

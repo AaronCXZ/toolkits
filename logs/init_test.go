@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	"go.uber.org/zap"
+
 	"github.com/Muskchen/toolkits/rollingwriter"
 )
 
@@ -39,10 +41,7 @@ func TestInit(t *testing.T) {
 	}
 	Init(cfg)
 	for i := 0; i < 1000; i++ {
-		SDebugf("测试debug%d", i)
-		SInfof("测试info%d", i)
-		SWarnf("测试warn%d", i)
-		SErrorf("测试错误%d", i)
+		zap.S().Info(i)
 		//Panic("测试panic",
 		//	zap.Int("panic", i),
 		//)

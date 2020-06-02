@@ -66,14 +66,6 @@ func Close() {
 	}
 }
 
-func GetLogger() *zap.Logger {
-	return logger
-}
-
-func GetSLogger() *zap.SugaredLogger {
-	return logger.Sugar()
-}
-
 // 初始化配置
 func newEncoderConfig(format string) zapcore.EncoderConfig {
 	return zapcore.EncoderConfig{

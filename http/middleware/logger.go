@@ -9,14 +9,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Muskchen/toolkits/logs"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
 const TimeFormat = "2006-01-02 15:04:05"
-
-var logger = logs.GetLogger()
 
 // 使用zao.logger的中间件
 func GinZapLogger() gin.HandlerFunc {
@@ -30,10 +27,10 @@ func GinZapLogger() gin.HandlerFunc {
 
 		if len(c.Errors) > 0 {
 			for _, e := range c.Errors.Errors() {
-				logger.Error(e)
+				zap.L().Error(e)
 			}
 		} else {
-			logger.Info(path,
+			zap.L().Info(path,
 				zap.Int("status", c.Writer.Status()),
 				zap.String("method", c.Request.Method),
 				zap.String("path", path),
@@ -59,10 +56,10 @@ func GinZapSugaredLogger() gin.HandlerFunc {
 
 		if len(c.Errors) > 0 {
 			for _, e := range c.Errors.Errors() {
-				logger.Sugar().Error(e)
+				zap.S().Error(e)
 			}
 		} else {
-			logger.Sugar().Info(path,
+			zap.S().Info(path,
 				zap.Int("status", c.Writer.Status()),
 				zap.String("method", c.Request.Method),
 				zap.String("path", path),
@@ -93,7 +90,7 @@ func RecoverWithZapLogger(stack bool) gin.HandlerFunc {
 
 				httpRequest, _ := httputil.DumpRequest(c.Request, false)
 				if brokenPipe {
-					logger.Error(c.Request.URL.Path,
+					zap.S().Error(c.Request.URL.Path,
 						zap.Any("error", err),
 						zap.String("request", string(httpRequest)),
 					)
@@ -103,14 +100,14 @@ func RecoverWithZapLogger(stack bool) gin.HandlerFunc {
 				}
 
 				if stack {
-					logger.Error("[Recovery from panic]",
+					zap.S().Error("[Recovery from panic]",
 						zap.Time("time", time.Now()),
 						zap.Any("error", err),
 						zap.String("request", string(httpRequest)),
 						zap.String("stack", string(debug.Stack())),
 					)
 				} else {
-					logger.Error("[Recovery from panic]",
+					zap.S().Error("[Recovery from panic]",
 						zap.Time("time", time.Now()),
 						zap.Any("error", err),
 						zap.String("request", string(httpRequest)),
