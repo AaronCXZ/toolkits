@@ -6,15 +6,12 @@ import (
 	"time"
 
 	"github.com/Muskchen/toolkits/logs"
+
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
 var logger *zap.SugaredLogger
-
-func init() {
-	logger = logs.GetSLogger()
-}
 
 var srv = &http.Server{
 	ReadTimeout:    time.Duration(10) * time.Second,
@@ -23,6 +20,7 @@ var srv = &http.Server{
 }
 
 func Start(r *gin.Engine, addr string) {
+	logger = logs.GetSLogger()
 	srv.Addr = addr
 	srv.Handler = r
 	go func() {
@@ -34,6 +32,7 @@ func Start(r *gin.Engine, addr string) {
 }
 
 func Shutdown() {
+	logger = logs.GetSLogger()
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(5)*time.Second)
 	defer cancel()
 	if err := srv.Shutdown(ctx); err != nil {
