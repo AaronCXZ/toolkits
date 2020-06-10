@@ -23,22 +23,28 @@ type CustomClaims struct {
 }
 
 var (
-	TokenExpired     error  = errors.New("Token is expired")
-	TokenNotValidYet error  = errors.New("Token not active yet")
-	TokenMalformed   error  = errors.New("That's not even a token")
-	TokenInvalid     error  = errors.New("Couldn't handle this token:")
-	SignKey          string = "test"
+	TokenExpired     error = errors.New("Token is expired")
+	TokenNotValidYet error = errors.New("Token not active yet")
+	TokenMalformed   error = errors.New("That's not even a token")
+	TokenInvalid     error = errors.New("Couldn't handle this token:")
+	SignKey                = "test"
 )
 
 func newJWT() *JWT {
 	return &JWT{SingingKey: []byte(GetSignKey())}
 }
 
+func GetSignKey() string {
+	return SignKey
+}
+
+// 创建token
 func (j *JWT) CreateToken(claims CustomClaims) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodES256, claims)
 	return token.SignedString(j.SingingKey)
 }
 
+// 解析token
 func (j *JWT) ParseToken(tokenString string) (*CustomClaims, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(token *jwt.Token) (i interface{}, err error) {
 		return j.SingingKey, nil
@@ -58,12 +64,18 @@ func (j *JWT) ParseToken(tokenString string) (*CustomClaims, error) {
 		}
 	}
 
-	if claims, ok := token.Claims.(*CustomClaims); ok && token.Valid {
-		return claims, nil
+	if token != nil {
+		if claims, ok := token.Claims.(*CustomClaims); ok && token.Valid {
+			return claims, nil
+		}
+		return nil, TokenInvalid
+	} else {
+		return nil, TokenInvalid
 	}
-	return nil, TokenInvalid
+
 }
 
+// 更新token
 func (j *JWT) RefreshToken(tokenString string) (string, error) {
 	jwt.TimeFunc = func() time.Time {
 		return time.Unix(0, 0)
@@ -79,7 +91,6 @@ func (j *JWT) RefreshToken(tokenString string) (string, error) {
 
 	if claims, ok := token.Claims.(*CustomClaims); ok && token.Valid {
 		jwt.TimeFunc = time.Now
-
 		claims.StandardClaims.ExpiresAt = time.Now().Add(1 * time.Hour).Unix()
 		return j.CreateToken(*claims)
 	}
@@ -87,19 +98,10 @@ func (j *JWT) RefreshToken(tokenString string) (string, error) {
 	return "", TokenInvalid
 }
 
-func GetSignKey() string {
-	return SignKey
-}
-
-func SetSignKey(key string) string {
-	SignKey := key
-	return SignKey
-}
-
 func JWTAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.DefaultQuery("token", "")
-
+		//TODO: 存储token
 		if token == "" {
 			token = c.Request.Header.Get("Authorization")
 			if s := strings.Split(token, " "); len(s) == 2 {
@@ -118,12 +120,15 @@ func JWTAuth() gin.HandlerFunc {
 					render.Data(c, gin.H{
 						"message": "refresh token", "token": token,
 					}, nil)
+					c.Abort()
 					return
 				}
 			}
 			c.JSON(http.StatusUnauthorized, gin.H{"error": 1, "message": err.Error()})
+			c.Abort()
 			return
 		}
 		c.Set("claims", claims)
+		c.Next()
 	}
 }
