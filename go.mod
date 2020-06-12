@@ -4,12 +4,17 @@ go 1.14
 
 require (
 	github.com/Shopify/sarama v1.26.4
+	github.com/apache/dubbo-go v1.4.1
+	github.com/apache/dubbo-go-hessian2 v1.5.0 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/dubbogo/gost v1.9.0 // indirect
 	github.com/gin-gonic/gin v1.6.3
+	github.com/go-playground/assert/v2 v2.0.1
 	github.com/go-redis/redis v6.15.8+incompatible
 	github.com/mailru/easyjson v0.7.1 // indirect
 	github.com/olivere/elastic v6.2.33+incompatible
 	github.com/onsi/ginkgo v1.12.3 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/stretchr/testify v1.6.1
 	go.uber.org/zap v1.15.0
