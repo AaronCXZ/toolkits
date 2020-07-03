@@ -6,6 +6,7 @@ require (
 	github.com/Shopify/sarama v1.26.4
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.6.3
+	github.com/go-playground/assert/v2 v2.0.1
 	github.com/go-redis/redis v6.15.8+incompatible
 	github.com/mailru/easyjson v0.7.1 // indirect
 	github.com/olivere/elastic v6.2.33+incompatible
