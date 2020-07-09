@@ -47,6 +47,8 @@ var (
 	DPanicf = logger.Sugar().DPanicf
 	Panic   = logger.Panic
 	Panicf  = logger.Sugar().Panicf
+	Fatal   = logger.Fatal
+	Fatalf  = logger.Sugar().Fatalf
 )
 
 func Init(cfg *Config) {
