@@ -34,6 +34,21 @@ type appender struct {
 
 var logger *zap.Logger
 
+var (
+	Debug   = logger.Debug
+	Debugf  = logger.Sugar().Debugf
+	Info    = logger.Info
+	Infof   = logger.Sugar().Infof
+	Warn    = logger.Warn
+	Warnf   = logger.Sugar().Warnf
+	Error   = logger.Error
+	Errorf  = logger.Sugar().Errorf
+	DPanic  = logger.DPanic
+	DPanicf = logger.Sugar().DPanicf
+	Panic   = logger.Panic
+	Panicf  = logger.Sugar().Panicf
+)
+
 func Init(cfg *Config) {
 	runner.Init()
 	fmt.Printf("HostName: %s, Workerspace: %s\n", runner.Hostname, runner.Cwd)
