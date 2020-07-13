@@ -3,6 +3,8 @@ package zabbix
 import (
 	"fmt"
 
+	"github.com/Muskchen/toolkits/errors"
+
 	"github.com/tidwall/gjson"
 )
 
@@ -39,12 +41,15 @@ func (z *Zabbix) GetTriggers(host string) (t triggers) {
 	return t
 }
 
-func (z *Zabbix) StatTrigger(tid, status string) {
+func (z *Zabbix) StatTrigger(tid, status string) error {
 	if status == "stop" {
 		status = "1"
-	} else {
+	} else if status == "start" {
 		status = "0"
+	} else {
+		return errors.New(fmt.Sprintf("status err: %s", status))
 	}
+
 	body := DefaultRequest(z.Token)
 	body.Method = "trigger.update"
 	body.Params = update{
@@ -54,6 +59,7 @@ func (z *Zabbix) StatTrigger(tid, status string) {
 	data := z.httpPost(body)
 	result := gjson.GetBytes(data, "result")
 	fmt.Println(result.String())
+	return nil
 }
 
 func GetTid(t triggers, name string) string {
