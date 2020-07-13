@@ -17,10 +17,9 @@ type update struct {
 	Triggerid string `json:"triggerid"`
 	Status    string `json:"status"`
 }
-type triggers map[string]string
 
-func (z *Zabbix) GetTriggers(host string) (t triggers) {
-	t = make(map[string]string, 0)
+func (z *Zabbix) GetTriggers(host string) (triggers map[string]string) {
+	var t = make(map[string]string, 0)
 	body := DefaultRequest(z.Token)
 	body.Method = "trigger.get"
 	body.Params = trigger{
@@ -62,8 +61,8 @@ func (z *Zabbix) StatTrigger(tid, status string) error {
 	return nil
 }
 
-func GetTid(t triggers, name string) string {
-	for k, v := range t {
+func GetTid(triggers map[string]string, name string) string {
+	for k, v := range triggers {
 		if v == name {
 			return k
 		}
