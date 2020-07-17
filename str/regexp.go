@@ -3,8 +3,6 @@ package str
 import (
 	"regexp"
 	"strings"
-
-	"github.com/Muskchen/toolkits/logger"
 )
 
 var IPReg, _ = regexp.Compile(`^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$`)
@@ -105,7 +103,6 @@ func GetPatAndTimeFormat(s string) (string, string) {
 		pattern = `(0[1-9]|1[012])([012][0-9]|3[01])\s([01][0-9]|2[0-4])(:[012345][0-9]){2}`
 		timeFormat = "0102 15:04:05"
 	default:
-		logger.Errorf("match time pac failed : [timeFormat:%s]", s)
 		return "", ""
 	}
 	return pattern, timeFormat
