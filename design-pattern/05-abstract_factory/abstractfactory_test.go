@@ -24,7 +24,7 @@ func ExampleXmlFactory() {
 	getMainAndDetail(factory)
 }
 
-func TESTFactory(t *testing.T) {
+func TestFactory(t *testing.T) {
 	t.Run("rdb", func(t *testing.T) {
 		ExampleRdbFactory()
 	})
