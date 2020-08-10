@@ -3,6 +3,7 @@ package cron
 import (
 	"errors"
 	"fmt"
+	"log"
 	"reflect"
 	"time"
 )
@@ -96,6 +97,20 @@ func (j *Job) Do(jobFun interface{}, params ...interface{}) error {
 		j.scheduleNextRun()
 	}
 	return nil
+}
+
+// panic处理
+func (j *Job) DoSafely(jobFunc interface{}, params ...interface{}) error {
+	recoveryWrapperFunc := func() {
+		defer func() {
+			if r := recover(); r != nil {
+				log.Printf("Internal panic occurred: %s", r)
+			}
+		}()
+
+		callJobFuncWithParams(jobFunc, params)
+	}
+	return j.Do(recoveryWrapperFunc)
 }
 
 // 任务运行的具体时间
