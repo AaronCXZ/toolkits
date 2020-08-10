@@ -13,11 +13,11 @@ type Scheduler struct {
 }
 
 var (
-	defaultScheduler = NewSchedule()
+	defaultScheduler = NewScheduler()
 )
 
 // 创建新的任务列表
-func NewSchedule() *Scheduler {
+func NewScheduler() *Scheduler {
 	return &Scheduler{
 		jobs: [10000]*Job{},
 		size: 0,
