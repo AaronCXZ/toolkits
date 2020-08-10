@@ -37,6 +37,7 @@ func ChangeLoc(newLocation *time.Location) {
 	defaultScheduler.ChangeLoc(newLocation)
 }
 
+// 添加锁
 func SetLocker(l Locker) {
 	locker = l
 }
