@@ -1,6 +1,7 @@
 package strategy
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -32,4 +33,25 @@ func genStrategyID(name, body string) int64 {
 
 	id += 1000000 //避免与web端配置的id冲突
 	return id
+}
+
+// 文件名校验，log.xxx.json
+func checkName(f string) (err error) {
+	if !strings.Contains(f, "log.") {
+		err = fmt.Errorf("name illege not contain log. %s", f)
+		return
+	}
+
+	arr := strings.Split(f, ".")
+	if len(arr) < 3 {
+		err = fmt.Errorf("name illege %s len:%d len < 3 ", f, len(arr))
+		return
+	}
+
+	if arr[len(arr)-1] != "json" {
+		err = fmt.Errorf("name illege %s not json file", f)
+		return
+	}
+
+	return
 }
