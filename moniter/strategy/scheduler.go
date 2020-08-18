@@ -115,7 +115,8 @@ func (s *Scheduler) Start() chan bool {
 	return stopped
 }
 
-func Add(strategies ...*Strategy) {
+func Make(path string) {
+	strategies, _ := getFromFile(path)
 	defauleScheruler.Add(strategies...)
 }
 
