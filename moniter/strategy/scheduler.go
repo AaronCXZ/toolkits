@@ -41,7 +41,7 @@ func (s *Scheduler) Less(i, j int) bool {
 	return s.strategies[j].nextRun.Unix() >= s.strategies[i].nextRun.Unix()
 }
 
-// 下次运行的策略
+// 需要立即运行的策略
 func (s *Scheduler) getRunningStrategies() (runningStrategies [MAXJOBNUM]*Strategy, n int) {
 	sort.Sort(s)
 	for i := 0; i < s.size; i++ {
@@ -77,6 +77,16 @@ func (s *Scheduler) RunPending() {
 	}
 }
 
+// 添加策略
+func (s *Scheduler) Add(strategies ...*Strategy) {
+	for _, strategy := range strategies {
+		if err := strategy.checkStrategy(); err != nil {
+			s.strategies[s.size] = strategy
+			s.size += 1
+		}
+	}
+}
+
 // 清空策略
 func (s *Scheduler) Clear() {
 	for i := 0; i < s.size; i++ {
@@ -85,6 +95,7 @@ func (s *Scheduler) Clear() {
 	s.size = 0
 }
 
+// 启动
 func (s *Scheduler) Start() chan bool {
 	stopped := make(chan bool, 1)
 	ticker := time.NewTicker(1 * time.Minute)
@@ -102,4 +113,16 @@ func (s *Scheduler) Start() chan bool {
 		}
 	}()
 	return stopped
+}
+
+func Add(strategies ...*Strategy) {
+	defauleScheruler.Add(strategies...)
+}
+
+func Start() chan bool {
+	return defauleScheruler.Start()
+}
+
+func Clear() {
+	defauleScheruler.Clear()
 }
