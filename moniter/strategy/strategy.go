@@ -40,10 +40,12 @@ type Strategy struct {
 	cmd     string
 }
 
+// true为需要立即运行
 func (st *Strategy) shouldRun() bool {
 	return time.Now().Unix() >= st.nextRun.Unix()
 }
 
+// SSH运行命令
 func (st *Strategy) run(host string) (count int, err error) {
 	fileExit := fmt.Sprintf("if [ ! -f %s ];then\n echo \"1\"\n else echo \"2\"\n fi\n", st.FileName)
 	newSSH := ssh.NewSSH(st.User, st.Password, host, 22)
@@ -66,6 +68,7 @@ func (st *Strategy) run(host string) (count int, err error) {
 	return strconv.Atoi(strings.Replace(out, "\n", "", -1))
 }
 
+// 执行策略
 func (st *Strategy) do() {
 	for _, host := range st.Hosts {
 		count, err := st.run(host)
@@ -78,6 +81,7 @@ func (st *Strategy) do() {
 	}
 }
 
+// 更新下次运行时间
 func (st *Strategy) scheduleNextRun() {
 	now := time.Now()
 	if st.lastRun == time.Unix(0, 0) {
@@ -89,7 +93,9 @@ func (st *Strategy) scheduleNextRun() {
 	}
 }
 
+// 将关键字解析为grep命令
 func (st *Strategy) parseKeyword() string {
+	st.parsePattern()
 	if st.Exclude == "" {
 		return fmt.Sprintf("egrep '%s'", st.Pattern)
 	} else {
@@ -97,10 +103,12 @@ func (st *Strategy) parseKeyword() string {
 	}
 }
 
+// 将配置文件中的时间间隔转化为时间
 func (st *Strategy) periodDuration() time.Duration {
 	return time.Duration(st.Interval) * time.Minute
 }
 
+// 检查策略并设置默认参数
 func (st *Strategy) checkStrategy() error {
 	if st.Name == "" {
 		return ErrNotStrategyName
@@ -117,6 +125,18 @@ func (st *Strategy) checkStrategy() error {
 	return nil
 }
 
+// 关键字解析
+func (st *Strategy) parsePattern() {
+	patList := strings.Split(st.Pattern, PATTERN_EXCLUDE_PARTITION)
+	if len(patList) == 1 {
+		st.Pattern = strings.TrimSpace(st.Pattern)
+	} else if len(patList) == 2 {
+		st.Pattern = strings.TrimSpace(patList[0])
+		st.Exclude = strings.TrimSpace(patList[1])
+	}
+}
+
+// 更新下次需要执行的命令
 func (st *Strategy) updateCmd() {
 	var times []string
 	counts := makeCounts(st.Interval)
@@ -129,6 +149,7 @@ func (st *Strategy) updateCmd() {
 	st.cmd = fmt.Sprintf("cat %s|egrep '%s'| %s |wc -l", st.FileName, strings.Join(times, "|"), grepKey)
 }
 
+// 判断是否需要发送报警
 func (st *Strategy) makeAlert(count int, host string) (alert Alerter) {
 	if count >= st.Threshold {
 		context := fmt.Sprintf("服务器：%s\n项目：%s\n监控间隔：%d分钟\n表达式：%s\n出现次数：%d次\n阈值：%d\n", host, st.Name, st.Interval, st.Pattern, count, st.Threshold)
