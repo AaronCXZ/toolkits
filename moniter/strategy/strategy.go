@@ -1,11 +1,14 @@
 package strategy
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Muskchen/toolkits/file"
 
 	"github.com/Muskchen/toolkits/ssh"
 )
@@ -95,7 +98,6 @@ func (st *Strategy) scheduleNextRun() {
 
 // 将关键字解析为grep命令
 func (st *Strategy) parseKeyword() string {
-	st.parsePattern()
 	if st.Exclude == "" {
 		return fmt.Sprintf("egrep '%s'", st.Pattern)
 	} else {
@@ -159,4 +161,33 @@ func (st *Strategy) makeAlert(count int, host string) (alert Alerter) {
 		return NewAlerter(phones, mails, context, sub)
 	}
 	return nil
+}
+
+// 从目录读取符合规则的文件，并解析成策略
+// 返回所有的策略
+func getFromFile(path string) (stras []*Strategy, err error) {
+	files, err := file.FilesUnder(path)
+	if err != nil {
+		return nil, err
+	}
+	for _, f := range files {
+		if err := checkName(f); err != nil {
+			continue
+		}
+		stra := Strategy{}
+		b, err := file.ReadBytes(f)
+		if err != nil {
+			continue
+		}
+		if err := json.Unmarshal(b, &stra); err != nil {
+			continue
+		}
+		stra.ID = genStrategyID(stra.Name, string(b))
+		if err := stra.checkStrategy(); err != nil {
+			continue
+		}
+		stra.parsePattern()
+		stras = append(stras, &stra)
+	}
+	return stras, nil
 }
