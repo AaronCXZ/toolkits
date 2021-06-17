@@ -22,7 +22,7 @@ var (
 	DefualtFileMode = os.FileMode(0644)
 	DefualtFileFlag = os.O_RDWR | os.O_CREATE | os.O_APPEND
 
-	// 自定义错误
+	// ErrInternal 自定义错误
 	ErrInternal        = errors.New("error internal")
 	ErrClosed          = errors.New("error write on close")
 	ErrInvalidArgument = errors.New("error argument invalid")
@@ -57,7 +57,7 @@ type Config struct {
 	Compress              bool   `json:"compress" yaml:"compress"`                      // 是否压缩历史日志
 }
 
-// 默认配置
+// NewDefaultConfig 默认配置
 func NewDefaultConfig() Config {
 	return Config{
 		TimeTagFormat:         "200601021504",
@@ -73,86 +73,86 @@ func NewDefaultConfig() Config {
 	}
 }
 
-// 生成日志文件完整路径
+// LogFilePath 生成日志文件完整路径
 func LogFilePath(c *Config) (filepath string) {
 	filepath = path.Join(c.LogPath, c.FileName) + ".log"
 	return filepath
 }
 
-// 配置构造函数，用于更新配置
+// Option 配置构造函数，用于更新配置
 type Option func(*Config)
 
-// 更新时间格式
+// WithTimeTagFormat 更新时间格式
 func WithTimeTagFormat(format string) Option {
 	return func(c *Config) {
 		c.TimeTagFormat = format
 	}
 }
 
-// 更新日志文件目录
+// WithLogPath 更新日志文件目录
 func WithLogPath(path string) Option {
 	return func(c *Config) {
 		c.LogPath = path
 	}
 }
 
-// 更新日志文件名称
+// WithFileName 更新日志文件名称
 func WithFileName(name string) Option {
 	return func(c *Config) {
 		c.FileName = name
 	}
 }
 
-// 改为async模式
+// WithAsynchronous 改为async模式
 func WithAsynchronous() Option {
 	return func(c *Config) {
 		c.WriterMode = "async"
 	}
 }
 
-// 改为lock模式
+// WithLock 改为lock模式
 func WithLock() Option {
 	return func(c *Config) {
 		c.WriterMode = "lock"
 	}
 }
 
-// 改为buffer模式
+// WithBuffer 改为buffer模式
 func WithBuffer() Option {
 	return func(c *Config) {
 		c.WriterMode = "buffer"
 	}
 }
 
-// 修改异步并发时的缓存池大小
+// WithBufferThreshold 修改异步并发时的缓存池大小
 func WithBufferThreshold(n int) Option {
 	return func(c *Config) {
 		c.BufferWriterThreshold = n
 	}
 }
 
-// 开启压缩历史日志文件
+// WithCompress 开启压缩历史日志文件
 func WithCompress() Option {
 	return func(c *Config) {
 		c.Compress = true
 	}
 }
 
-// 更新历史文件保存数
+// WithMaxRemain 更新历史文件保存数
 func WithMaxRemain(max int) Option {
 	return func(c *Config) {
 		c.MaxRemain = max
 	}
 }
 
-// 设置为不滚动模式
+// WithoutRollingPolicy 设置为不滚动模式
 func WithoutRollingPolicy() Option {
 	return func(c *Config) {
 		c.RollingPolicy = WithoutRolling
 	}
 }
 
-// 设置为按时间滚动模式，更新滚动时间表达式
+// WithRollingTimePattern 设置为按时间滚动模式，更新滚动时间表达式
 func WithRollingTimePattern(pattern string) Option {
 	return func(c *Config) {
 		c.RollingPolicy = TimeRolling
@@ -160,7 +160,7 @@ func WithRollingTimePattern(pattern string) Option {
 	}
 }
 
-// 设置为按大小滚动模式，更新滚动时截断的最大值
+// WithRollingVolumeSize 设置为按大小滚动模式，更新滚动时截断的最大值
 func WithRollingVolumeSize(size string) Option {
 	return func(c *Config) {
 		c.RollingPolicy = VolumeRolling

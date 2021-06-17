@@ -18,7 +18,7 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// 当WriterMode为none时使用的结构，无保护的writer: 不提供并发安全保障
+// Writer 当WriterMode为none时使用的结构，无保护的writer: 不提供并发安全保障
 type Writer struct {
 	m             Manager
 	file          *os.File // 当前的写入文件
@@ -28,13 +28,13 @@ type Writer struct {
 	rollingfilech chan string //
 }
 
-// 当WriterMode为lock时使用的结构，lock保护的writer: 提供由mutex保护的并发安全保障
+// LockedWriter 当WriterMode为lock时使用的结构，lock保护的writer: 提供由mutex保护的并发安全保障
 type LockedWriter struct {
 	Writer
 	sync.Mutex
 }
 
-// 当WriterMode为async时使用的结构，同步writer，并发安全
+// AsynchronousWriter 当WriterMode为async时使用的结构，同步writer，并发安全
 type AsynchronousWriter struct {
 	Writer
 	ctx     chan int    // 有数据时退出写入
@@ -44,7 +44,7 @@ type AsynchronousWriter struct {
 	wg      sync.WaitGroup
 }
 
-// 当WriterMode为buffer时使用的结构，异步write, 并发安全
+// BufferWriter 当WriterMode为buffer时使用的结构，异步write, 并发安全
 type BufferWriter struct {
 	Writer
 	buf     *[]byte // 待写入数据
@@ -58,7 +58,7 @@ var _asyncBufferPool = sync.Pool{
 	},
 }
 
-// 根据配置生成RollingWriter，用于接收日志输入
+// NewWriterFromConfig 根据配置生成RollingWriter，用于接收日志输入
 func NewWriterFromConfig(c *Config) (RollingWriter, error) {
 	// 判断配置
 	if c.LogPath == "" || c.FileName == "" {
@@ -173,7 +173,7 @@ func NewWriterFromConfig(c *Config) (RollingWriter, error) {
 	return rollingWriter, nil
 }
 
-// 执行各个构造函数更新配置后生产RollingWriter
+// NewWriter 执行各个构造函数更新配置后生产RollingWriter
 func NewWriter(ops ...Option) (RollingWriter, error) {
 	cfg := NewDefaultConfig()
 	for _, opt := range ops {
@@ -182,7 +182,7 @@ func NewWriter(ops ...Option) (RollingWriter, error) {
 	return NewWriterFromConfig(&cfg)
 }
 
-// 从配置文件读取配置,解析后生成RollingWriter,支持json和yaml类型
+// NewWriterFromConfigFile 从配置文件读取配置,解析后生成RollingWriter,支持json和yaml类型
 func NewWriterFromConfigFile(path string, typ string) (RollingWriter, error) {
 	file, err := os.Open(path)
 	if err != nil {
@@ -209,7 +209,7 @@ func NewWriterFromConfigFile(path string, typ string) (RollingWriter, error) {
 	return NewWriterFromConfig(&cfg)
 }
 
-// 删除过期的历史日志文件
+// DoRemove 删除过期的历史日志文件
 func (w *Writer) DoRemove() {
 	select {
 	case file := <-w.rollingfilech:
@@ -219,7 +219,7 @@ func (w *Writer) DoRemove() {
 	}
 }
 
-// 压缩历史文件
+// CompressFile 压缩历史文件
 func (w *Writer) CompressFile(oldfile *os.File, cmpname string) error {
 	cmpfile, err := os.OpenFile(cmpname, DefualtFileFlag, DefualtFileMode)
 	defer cmpfile.Close()
@@ -245,7 +245,7 @@ func (w *Writer) CompressFile(oldfile *os.File, cmpname string) error {
 	return os.Remove(cmpname + ".tmp")
 }
 
-// 执行日志滚动， file为生成的历史文件名称
+// Reopen 执行日志滚动， file为生成的历史文件名称
 func (w *Writer) Reopen(file string) error {
 	// 重命名
 	if err := os.Rename(w.absPath, file); err != nil {
@@ -382,19 +382,19 @@ func (w *BufferWriter) Write(b []byte) (int, error) {
 	return len(b), nil
 }
 
-// 没有lock的Close接口实现，借助atomic实现原子性操作
+// Close 没有lock的Close接口实现，借助atomic实现原子性操作
 func (w *Writer) Close() error {
 	return (*os.File)(atomic.LoadPointer((*unsafe.Pointer)(unsafe.Pointer(&w.file)))).Close()
 }
 
-// 使用lock的Close接口实现
+// Close 使用lock的Close接口实现
 func (w *LockedWriter) Close() error {
 	w.Lock()
 	defer w.Unlock()
 	return w.file.Close()
 }
 
-// 同步并发的Close接口实现
+// Close 同步并发的Close接口实现
 func (w *AsynchronousWriter) Close() error {
 	// w.closed==0，并设置w.closed=1
 	if atomic.CompareAndSwapInt32(&w.closed, 0, 1) {
@@ -443,7 +443,7 @@ func (w *AsynchronousWriter) writer() {
 	}
 }
 
-// 异步并发的Close接口实现
+// Close 异步并发的Close接口实现
 func (w BufferWriter) Close() error {
 	_, err := w.file.Write(*w.buf)
 	if err != nil {

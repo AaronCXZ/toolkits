@@ -87,7 +87,7 @@ func (m *manager) Close() {
 	m.cr.Stop()
 }
 
-// 生成新的历史日志文件名称，更新startAt为当前时间
+// GenLogFileName 生成新的历史日志文件名称，更新startAt为当前时间
 func (m *manager) GenLogFileName(c *Config) (filename string) {
 	m.lock.Lock()
 	defer m.lock.Unlock()
@@ -100,7 +100,7 @@ func (m *manager) GenLogFileName(c *Config) (filename string) {
 	return filename
 }
 
-// 根据配置更新m.thresholdSize
+// ParseVolume 根据配置更新m.thresholdSize
 func (m *manager) ParseVolume(c *Config) {
 	// 读取大小滚动策略时的截断大小
 	s := []byte(strings.ToUpper(c.RollingVolumeSize))
