@@ -32,30 +32,28 @@ type appender struct {
 	Rolling *rollingwriter.Config `json:"rolling" yaml:"rolling"`
 }
 
-var logger *zap.Logger
-
 var (
-	Debug   = logger.Debug
-	Debugf  = logger.Sugar().Debugf
-	Info    = logger.Info
-	Infof   = logger.Sugar().Infof
-	Warn    = logger.Warn
-	Warnf   = logger.Sugar().Warnf
-	Error   = logger.Error
-	Errorf  = logger.Sugar().Errorf
-	DPanic  = logger.DPanic
-	DPanicf = logger.Sugar().DPanicf
-	Panic   = logger.Panic
-	Panicf  = logger.Sugar().Panicf
-	Fatal   = logger.Fatal
-	Fatalf  = logger.Sugar().Fatalf
+	logger *zap.Logger
+	config zapcore.EncoderConfig
+	encode zapcore.Encoder
 )
 
-func Init(cfg *Config) {
+func init() {
 	runner.Init()
 	fmt.Printf("HostName: %s, Workerspace: %s\n", runner.Hostname, runner.Cwd)
-	config := newEncoderConfig(cfg.Format)
-	encoder := encoder(cfg.Type, config)
+	config = newEncoderConfig("2006-01-02 15:04:05")
+	encode = encoder("json", config)
+	writer := os.Stdout
+	level := logLevel("debug")
+	core := zapcore.NewCore(encode, zapcore.AddSync(writer), level)
+	logger = zap.New(core, zap.AddCaller())
+	logger = logger.WithOptions(zap.AddStacktrace(zapcore.ErrorLevel))
+	logger.WithOptions(zap.Development())
+}
+
+func Init(cfg *Config) {
+	config = newEncoderConfig(cfg.Format)
+	encode = encoder(cfg.Type, config)
 	var Logs []zapcore.Core
 	for _, app := range cfg.Appenders {
 		writer, err := rollingwriter.NewWriterFromConfig(app.Rolling)
@@ -63,7 +61,7 @@ func Init(cfg *Config) {
 			writer = os.Stdout
 		}
 		level := logLevel(app.Level)
-		core := zapcore.NewCore(encoder, zapcore.AddSync(writer), level)
+		core := zapcore.NewCore(encode, zapcore.AddSync(writer), level)
 		Logs = append(Logs, core)
 	}
 
@@ -77,11 +75,11 @@ func Init(cfg *Config) {
 	}
 }
 
-func GetLogger() *zap.Logger {
+func Logger() *zap.Logger {
 	return logger
 }
 
-func GetSLogger() *zap.SugaredLogger {
+func SLogger() *zap.SugaredLogger {
 	return logger.Sugar()
 }
 
