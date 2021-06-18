@@ -12,7 +12,7 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
-// 日志配置
+// Config 日志配置
 type Config struct {
 	// 时间格式
 	Format string `json:"format" yaml:"format"`
