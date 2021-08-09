@@ -12,7 +12,7 @@ jobs:
       - name: Check out code into the go module directory
         uses: actions/checkout@v1
       - name: golangci-lint
-        uses: reviemdog/action-glangci-lint@v1
+        uses: reviewdog/action-glangci-lint@v1
         with:
            golangci_lint_flages: "--enable-all --timeout=10m --exclude-use-default=false --tests=false --disable=gochecknoinits,gochecknoglobals,exhaustive,nakedret,exhaustivestruct"
            workdir: pkg
